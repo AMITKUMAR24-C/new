@@ -1,0 +1,1311 @@
+To run the files :
+Step 1 : Install flex or lex 
+sudo apt-get update
+
+sudo apt-get install gcc 
+sudo apt-get install lex
+sudo apt-get install bison
+
+sudo apt-get install flex
+
+step 2 : to run c file :
+gcc file.c –o file.out
+./file.out
+
+Step 3: To run lex file:
+lex lexfile.l OR flex lexfile.l
+gcc lex.yy.c –o lex.out
+./lex.out
+
+Step 4 : To run yacc files:
+yacc -d yaccfile.y
+lex lexfile.l
+gcc lex.yy.c y.tab.c
+./a.out
+
+
+
+
+Assignment 3
+Ques 1: C program for identification of comment.
+#include <bits/stdc++.h>
+using namespace std;
+// Remove comments from string s
+void RemoveComments(string _s)
+{
+	// split s into code and comments
+	string code;
+	string comment;
+	// determines prev char to determine next char
+	enum CommentType
+	{
+		None,
+		slash,
+		SingleLine,
+		MultiLineEnd,
+		MultiLine
+	};
+	CommentType Current = CommentType::None;
+	// loop through the file/string.
+	for (auto ch = _s.begin(); ch != _s.end(); ch++)
+	{
+		if (Current != CommentType::SingleLine && Current != CommentType::MultiLine && Current != CommentType::MultiLineEnd)
+		{
+			// if not in a comment, and encounter a '/', change Current to slash as it could be a new comment
+			if (*ch == '/')
+			{
+				// if Current was slash, new / starts a single line comment
+				if (Current == CommentType::slash)
+				{
+					Current = CommentType::SingleLine;
+					code.pop_back();
+				}
+				else
+					code += *ch;
+				if (Current == CommentType::None)
+				{
+					Current = CommentType::slash;
+				}
+			}
+			// detect if it could be start of new multi-line comment
+			else if (*ch == '*')
+			{
+				// if it was slash, new * starts a multi line comment
+				if (Current == CommentType::slash)
+				{
+					Current = CommentType::MultiLine;
+					code.pop_back();
+				}
+				else
+					code += *ch;
+			}
+			else
+				code += *ch;
+		}
+		// if already in a single line comment '\n' can break the comment
+		else if (Current == CommentType::SingleLine)
+		{
+			if (*ch == '\n')
+			{
+				Current = CommentType::None;
+			}
+			comment += *ch;
+		}
+		// if in multi line end, '/' can break the comment
+		else if (Current == CommentType::MultiLineEnd)
+		{
+			if (*ch == '/')
+			{
+				Current = CommentType::None;
+				comment.pop_back();
+			}
+			else
+				comment += *ch;
+		}
+		else // if (Current == CommentType::MultiLine)
+		{
+			// encountered * could be the end of multi-line comment if / follows
+			if (*ch == '*')
+			{
+				comment += *ch;
+				Current = CommentType::MultiLineEnd;
+			}
+			else
+				comment += *ch;
+		}
+	}
+	// print code and comments
+	cout << "__code__\n"
+		 << code << endl
+		 << endl;
+	cout << "__comment__\n"
+		 << comment;
+}
+// driver code and string to be handled
+int main()
+{
+	// s can be initialised/replaced with file.
+	string s = "// Declare an array \n int v[3] = {10, 100, 200};/* declared **/ \n// Declare pointer variable \n int *ptr; int x = a / b;";
+
+	RemoveComments(s);
+
+	return 0;
+}
+
+Ques 2 : Write a C program to recognize strings under 'a*', 'a*b+', 'abb'.
+#include <iostream>
+																	using namespace std;
+/*
+This function will check if the given string is
+from the grammer 'a', 'a*b+', 'abb'.
+'a' - a
+'a*b+' - 0+ a's and 1+ b's
+'aab' - aab
+*/
+bool isValidString(string s)
+{
+	int len = s.length(), countA = 0, countB = 0, i = 0;
+	/*
+		we can iterate through the string.
+		in the next while loops we'll check if string contain language a^n.b^m
+		we'll keep count of number of a's and b's
+	*/
+	while (i < len)
+	{
+		if (s[i] == 'a')
+			countA++;
+		else
+			break;
+		i++;
+	}
+	while (i < len)
+	{
+		if (s[i] == 'b')
+			countB++;
+		else
+			return false;
+		i++;
+	}
+	/*
+	we have only three productions to check
+	we're checking them one by one.
+	*/
+	if (countA == 1 && countB == 0)
+		return true; // case 1.
+	else if (countA == 2 && countB == 1)
+		return true; // case 3.
+	else if (countB == 0)
+		return false; // other cases.
+	return true;	  // case 2.
+}
+
+/*Driver Code
+user needs to give the number of times(t) he want to run the code.
+for each t he/she needs to input the string to be checked.
+*/
+int main()
+{
+	int t;
+	cin >> t;
+	while (t--)
+	{
+		string s;
+		cin >> s;
+		if (isValidString(s))
+		{
+			cout << "accepted" << endl;
+		}
+		else
+		{
+			cout << "not accepted" << endl;
+		}
+	}
+}
+Ques 3 : c program to test whether a given identifier is valid or not .C code :
+
+#include <stdio.h>
+#include <conio.h>
+#include <string.h>
+	int
+	main()
+{
+	char string[25];
+	int count = 0, flag;
+	printf("Enter any string: ");
+	gets(string);
+	if ((string[0] >= 'a' && string[0] <= 'z') || (string[0] >= 'A' && string[0] <= 'Z') || (string[0] == '_'))
+	{
+		for (int i = 1; i <= strlen(string); i++)
+		{
+			if ((string[i] >= 'a' && string[i] <= 'z') || (string[i] >= 'A' && string[i] <= 'Z') || (string[i] >= '0' && string[i] <= '9') || (string[i] == '-'))
+			{
+				count++;
+			}
+		}
+		if (count == strlen(string))
+		{
+			flag = 0;
+		}
+	}
+	else
+	{
+		flag = 1;
+	}
+	if (flag == 1)
+		printf("%s is not valid identifier", string);
+	else
+		printf("%s is valid identifier", string);
+	return 0;
+}
+
+Assignment 4 Ques 1 : Lex program that copies a C program, replacing each instance of the keyword float with double.C program :
+#include <stdio.h>
+	int
+	main()
+{
+	float a = 1.2;
+	return 0;
+}
+
+Lex program :
+	/* Lex Program that copies a C program, replacing each instance of the keyword float with double */
+	/* Definations */
+	%
+{
+/* standard io for io functions, string.h for string functions and stdlib for exit()*/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+	/* String variable to store string line by line*/
+	char string[200];
+	%
+}
+
+/* Rules */
+/* Copy a line to the output file */
+/* Replace sequence of white space by a single blank */
+/* Copy everything else as it is to the line*/
+/*Copy a line to the output file at the end*/
+% %
+	[\n]
+{fprintf(yyout, "%s\n", string); string[0] = '\0'; } "float"
+{
+	fprintf(yyout, "%s", string);
+	string[0] = '\0';
+	fprintf(yyout, "%s", "double");
+}
+.strcat(string, yytext);
+<< EOF >>
+{
+	fprintf(yyout, "%s", string);
+	return 0;
+}
+% %
+
+	int main()
+{
+	extern FILE *yyin, *yyout;
+	char filename[100];
+	printf("This Program is going copy a C program, replacing each instance of the keyword float with double!\nEnter the name of the C file to copy:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	printf("Enter the name of the C file to open for writing:\t");
+	scanf("%s", filename);
+	/* Opening file to write */
+	yyout = fopen(filename, "w");
+	if (yyout == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(1);
+	}
+	yylex();
+}
+
+int yywrap(void)
+{
+	return 1;
+}
+Ques 2 : Lex program to count the number of vowels and consonants from an input file and write the results to a file.Input file : Hello there, how are you all ? Lex code :
+																																							   /* Lex program to count the number of vowels and consonants from an input file and write the results to a file. */
+																																				   /* Definations */
+																																				   consonant[b - df - hj - np - tv - zB - DF - HJ - NP - TV - Z] vowel[aeiouAEIOU] %
+{
+/* standard io for io functions and stdlib for exit()*/
+#include <stdio.h>
+#include <stdlib.h>
+	/* Counter variables */
+	int vcounter, ccounter;
+	%
+}
+
+/* Rules */
+/* Count vowels */
+/* Count consonants */
+/* Ignore everything else */
+% %
+	{vowel} vcounter++;
+{consonant} ccounter++;
+.;
+\n;
+% %
+
+	int main()
+{
+	extern FILE *yyin, *yyout;
+	char filename[100];
+	printf("This Program program counts the number of vowels and consonants from an input file and write the results to a file!\nEnter the name of the file to read:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	printf("Enter the name of the file to open for writing:\t");
+	scanf("%s", filename);
+	/* Opening file to write */
+	yyout = fopen(filename, "w");
+	if (yyout == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(1);
+	}
+	yylex();
+	fprintf(yyout, "Vowels: %d\nConsonants: %d", vcounter, ccounter);
+	return 0;
+}
+
+int yywrap(void)
+{
+	return 1;
+}
+
+Ques 3 : Lex program to identify identifiers from a given input source file.Lex code :
+	/* Lex program which will identify identifier from given file */
+	/* Definition Section */
+	digit[0 - 9] letter[A - Za - z] %
+	{
+#include <stdio.h>
+#include <stdlib.h>
+		% }
+
+	/* Rule Section */
+	/* Check the identifier */
+	/* Ignore everything else */
+	% %
+	{letter}({letter} | {digit} | _) * printf("Identifier is %s\n", yytext);
+.|\n;
+% %
+
+	int main()
+{
+	extern FILE *yyin;
+	char filename[100];
+	printf("This Program program checks if it is identifier or not!\nEnter the name of the file to read:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	/*call the yylex function.*/
+	yylex();
+	return 0;
+}
+
+/*call the yywrap function*/
+int yywrap()
+{
+	return 1;
+}
+
+Ques 4 : Lex program to find out all the tokens from input C program.(input read from file)
+			 Lex code :
+	/* lex program to find out all the tokens input C program. */
+	/* Definition Section */
+	digit[0 - 9] letter[a - zA - Z] %
+	{
+#include <stdio.h>
+#include <stdlib.h>
+		% }
+	/* Rule Section */
+	/* Token specification */
+	% %
+	"int" printf("Token: INT\n");
+"(" printf("Token: (\n");
+")" printf("Token: )\n");
+"{" printf("Token: {\n");
+"}" printf("Token: }\n");
+";" printf("Token: End of Statement\n");
+"//".*;
+"return" printf("Token: RETURN\n");
+"," printf("Token: , operator\n");
+"=" printf("Token: assignment operator\n");
+{letter}({letter} | {digit}) * printf("Token: identifier\n");
+{digit} + printf("Token: Integer value\n");
+.|\n;
+% %
+	int main()
+{
+	extern FILE *yyin;
+	char filename[100];
+	printf("This Program program finds all tokens!!\nEnter the name of the file to read:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	/*call the yylex function.*/
+	yylex();
+	return 0;
+}
+
+/*call the yywrap function*/
+int yywrap()
+{
+	return 1;
+}
+
+Ques 5 : Lex program to count the number of lines in a given input source file.Lex code :
+	/* Lex program to count the number of lines in a given input source file. */
+	%
+{
+/* standard io for io functions and stdlib for exit()*/
+#include <stdio.h>
+#include <stdlib.h>
+	/* Counter variables */
+	int count;
+	%
+}
+
+/* Rules */
+/* Ignore everything else */
+/* Count lines */
+% %
+		.;
+\n count++;
+% %
+
+	int main()
+{
+	extern FILE *yyin;
+	char filename[100];
+	printf("This Program program counts the number of lines present in an input file!\nEnter the name of the file to read:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	yylex();
+	printf("Number of Lines %d\n", count + 1);
+	return 0;
+}
+
+int yywrap(void)
+{
+	return 1;
+}
+
+Assignment 5 Ques 1 : Lex program to count the number of palindromes present in a input text and write them to a separate text file.Lex code :
+	/* Lex program to count the number of palindromes present in a input text */
+	/* and write them to a separate text file */
+	%
+{
+#include <stdio.h>
+#include <stdlib.h>
+	int i, len, counter;
+	%
+}
+
+/* Rule Section */
+/* Count palindrome */
+/* Ignore everything else */
+% %
+		[a - zA - Z0 - 9] +
+{
+	len = strlen(yytext);
+	for (i = 0; i < len; i++)
+	{
+		if (yytext[i] != yytext[len - 1 - i])
+			break;
+	}
+	if (i == len)
+	{
+		counter++;
+		fprintf(yyout, "%s\n", yytext);
+	}
+};
+.;
+\n;
+% %
+
+	int main()
+{
+	extern FILE *yyout;
+	char filename[100];
+	printf("This Program program counts the number of palindromes from an input file and puts the palindrome in a text file\n");
+	printf("Enter the name of the file to open for writing:\t");
+	scanf("%s", filename);
+	/* Opening file to write */
+	yyout = fopen(filename, "w");
+	if (yyout == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(1);
+	}
+	yylex();
+	fprintf(yyout, "Palindromes: %d\n", counter);
+	printf("Palindromes: %d\n", counter);
+	return 0;
+}
+
+int yywrap(void)
+{
+	return 1;
+}
+
+Ques 2 : Lex program that copies a file, replacing each nonempty sequence of white space by a single blank.Lex code
+											 /* Lex Program that copies a file, replacing each nonempty sequence of white space by a single blank */
+											 /* Definations */
+											 %
+{
+/* standard io for io functions, string.h for string functions and stdlib for exit()*/
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+	/* String variable to store string line by line*/
+	char string[200];
+	%
+}
+
+/* Rules */
+/* Copy a line to the output file */
+/* Replace sequence of white space by a single blank */
+/* Copy everything else as it is to the line*/
+/*Copy a line to the output file at the end*/
+% %
+	[\n]
+{fprintf(yyout, "%s\n", string); string[0] = '\0'; }
+		[] *
+{
+	fprintf(yyout, "%s", string);
+	string[0] = '\0';
+	fprintf(yyout, "%s", " ");
+}
+.strcat(string, yytext);
+<< EOF >>
+{
+	fprintf(yyout, "%s", string);
+	return 0;
+}
+% %
+
+	int main()
+{
+	extern FILE *yyin, *yyout;
+	char filename[100];
+	printf("This Program is going copy a file, replacing each nonempty sequence of white space by a single blank!\nEnter the name of the file to copy:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	printf("Enter the name of the file to open for writing:\t");
+	scanf("%s", filename);
+	/* Opening file to write */
+	yyout = fopen(filename, "w");
+	if (yyout == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(1);
+	}
+	yylex();
+}
+
+int yywrap(void)
+{
+	return 1;
+}
+
+Ques 3 : Lex program to count the number of comment lines in a c program.Also eliminate that comment line.(input read from file).C program :
+#include <stdio.h>
+	Int main()
+{
+	// this is comment : printf usage
+	printf(“hello world”);
+	return 0;
+}
+Lex code :
+	/* Write a Lex program to count the number of comment lines in a c program. Also eliminate that comment line (Input read from file). */
+	/* Definition Section */
+	%
+{
+#include <stdio.h>
+#include <stdlib.h>
+	int counter;
+	%
+}
+
+/* Rule Section */
+/* Check the identifier */
+/* Ignore everything else */
+% %
+		[/][*][^*] *[*] +
+	([^* / ][^*] *[*] +) *[/] counter++;
+.|\n ECHO;
+% %
+
+	int main()
+{
+	extern FILE *yyin;
+	char filename[100];
+	printf("This Program program counts the number of comment!!\nEnter the name of the file to read:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	/*call the yylex function.*/
+	yylex();
+	printf("\nNumber of comments: %d\n", counter);
+	return 0;
+}
+
+/*call the yywrap function*/
+int yywrap()
+{
+	return 1;
+}
+
+Ques 4 : Lex program to count the number of stopwords and remove all of them.Lex code :
+	/* lex program to count the number of stopwords and remove all of them. */
+	/* Definition Section */
+	stopwords(" ourselves " | " hers  " | " between " | " yourself " | " but " | " again " | " there " | " about " | " once " | " during " | " out " | " very " | " having " | " with " | " they " | " own " | " an " | " be " | " some " | " for " | " do " | " its " | " yours " | " such " | " into " | " of " | " most " | " itself " | " other " | " off " | " is " | " s " | " am " | " or " | " who " | " as " | " from " | " him " | " each " | " the " | " themselves " | " until " | " below " | " are " | " we " | " these " | " your " | " his " | " through " | " don " | " nor " | " me " | " were " | " her " | " more " | " himself " | " this " | " down " | " should " | " our " | " their " | " while " | " above " | " both " | " up " | " to " | " ours " | " had " | " she " | " all " | " no " | " when " | " at " | " any " | " before " | " them " | " same " | " and " | " been " | " have " | " in " | " will " | " on " | " does " | " yourselves " | " then " | " that " | " because " | " what " | " over " | " why " | " so " | " can " | " did " | " not " | " now " | " under " | " he " | " you " | " herself " | " has " | " just " | " where " | " too " | " only " | " myself " | " which " | " those " | " i " | " after " | " few " | " whom " | " t " | " being " | " if " | " theirs " | " my " | " against " | " a " | " by " | " doing " | " it " | " how " | " further " | " was " | " here " | " than ") %
+{
+#include <stdio.h>
+#include <stdlib.h>
+	int counter;
+	%
+}
+
+/* Rule Section */
+/* Check the stopwords */
+/* Ignore everything else */
+
+% %
+	{stopwords} { counter++; }
+.|\n ECHO;
+% %
+
+	int main()
+{
+	extern FILE *yyin;
+	char filename[100];
+	printf("This Program program counts the number of stopwords!!\nEnter the name of the file to read:\t");
+	scanf("%s", filename);
+	/* Opening file to read */
+	yyin = fopen(filename, "r");
+	if (yyin == NULL)
+	{
+		printf("Cannot open file %s\n", filename);
+		exit(0);
+	}
+	/*call the yylex function.*/
+	yylex();
+	printf("\nNumber of stopwords: %d\n", counter);
+	return 0;
+}
+
+/*call the yywrap function*/
+int yywrap()
+{
+	return 1;
+}
+
+Ques 5 : Lex program to identify all the numbers in an input text and then perform the sum of the numbers.Lex code :
+	/* Lex program to identify all the numbers in an input text and then perform the sum of the numbers. */
+	/* Definition Section */
+	digits[0 - 9] +
+	| ([0 - 9] *)"."([0 - 9] +) %
+{
+#include <stdio.h>
+#include <stdlib.h>
+	float sum = 0, a;
+	%
+}
+
+/* Rule Section */
+% %
+	{digits}
+{
+	printf("Number: %s\n", yytext);
+	sum += atof(yytext);
+}
+.;
+\n
+{
+	printf("Sum : %f\n", sum);
+	sum = 0;
+}
+% %
+
+	int main()
+{
+	yylex();
+	return 0;
+}
+
+/*call the yywrap function*/
+int yywrap()
+{
+	return 1;
+}
+
+Assignment 6 Ques 1 : YACC program to implement a Calculator and recognize a valid Arithmetic expression
+						  Lex code :
+	/* lex program for simple calculator */
+	%
+	{
+#include "y.tab.h"
+		% }
+
+	/* Lex definations */
+	%
+	%
+	"print"
+{
+	return print;
+}
+"exit" { return exit_command; }
+[a - zA - Z]
+{yylval.id = yytext[0]; return identifier; }
+		[0 - 9] +
+{
+	yylval.num = atoi(yytext);
+	return number;
+}
+[ \t\n];
+[- += * / ;]
+{ return yytext[0]; }
+	.
+{
+	ECHO;
+	yyerror("Unexpected Character");
+}
+% %
+	int yywrap()
+{
+	return 1;
+}
+
+Yacc code :
+	/* yacc program for simple calculator */
+	%
+{
+	void yyerror(char *);
+#include <stdio.h>
+#include <stdlib.h>
+	int symbols[52];
+	int symbolVal(char);
+	void updateSymbolVal(char, int);
+	%
+}
+
+/* yacc definations */
+% union
+{
+	int num;
+	char id;
+} % start line % token print % token exit_command % token<num> number % token<id> identifier % type<num> line expe expt expf % type<id> assignment
+
+	/* Grammar definations with actions */
+	% %
+	line : assignment ';'
+{
+	;
+}
+| exit_command ';' { exit(EXIT_SUCCESS); }
+| print expe ';' { printf("Printing %d\n", $2); }
+| line assignment ';' { ; }
+| line print expe ';' { printf("Printing %d\n", $3); }
+| line exit_command ';' { exit(EXIT_SUCCESS); };
+assignment : identifier '=' expe { updateSymbolVal($1, $3); };
+expe : expe '+' expt { $$ = $1 + $3; }
+| expe '-' expt { $$ = $1 - $3; }
+| expt { $$ = $1; };
+expt : expt '*' expf { $$ = $1 * $3; }
+| expt '/' expf { $$ = $1 / $3; }
+| expf { $$ = $1; };
+expf : '(' expe ')' { $$ = $2; }
+| number { $$ = $1; }
+| identifier { $$ = symbolVal($1); };
+% %
+
+	/* This function computes the index value for a given character */
+	int computeSymbolIndex(char token)
+{
+	int idx = -1;
+	if (islower(token))
+	{
+		idx = token - 'a' + 26;
+	}
+	else if (isupper(token))
+	{
+		idx = token - 'A';
+	}
+	return idx;
+}
+
+/* This function looks up the value of an identifier */
+int symbolVal(char symbol)
+{
+	int bucket = computeSymbolIndex(symbol);
+	return symbols[bucket];
+}
+
+/* This function updates the value of an identifier */
+void updateSymbolVal(char symbol, int val)
+{
+	int bucket = computeSymbolIndex(symbol);
+	symbols[bucket] = val;
+}
+
+/* main function */
+int main()
+{
+	/* Initialising all values of identifier as 0 */
+	int i;
+	for (i = 0; i < 52; i++)
+	{
+		symbols[i] = 0;
+	}
+	printf("Calculator built using YACC and LEX\n");
+	printf("Reserved keywords: exit, print\n");
+	return yyparse();
+}
+
+void yyerror(char *s)
+{
+	fprintf(stderr, "%s\n", s);
+}
+
+Ques 2 : YACC program which accept strings that starts with 0 and ends with 1. Lex code :
+	/* lex program for recognition of string */
+	%
+	{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+/* Generated by yacc */
+#include "y.tab.h"
+		% }
+
+	/* Lex definitions */
+	%
+	%
+	exit.*
+{
+	return exit_command;
+}
+quit.* { return exit_command; }
+[01]
+{ return yytext[0]; }
+		[a - zA - Z2 - 9] +
+{ return str; }
+\n { return newline; }
+[ \t];
+.
+{
+	ECHO;
+	yyerror("Unexpected Character");
+}
+% %
+	int yywrap()
+{
+	return 1;
+}
+
+Yacc code :
+	/* yacc program for recognition of string */
+	%
+{
+	void yyerror(char *);
+#include <stdio.h>
+#include <stdlib.h>
+	%
+}
+
+/* yacc definations */
+% start lines % token str % token newline % token exit_command
+
+		/* Grammar Rules with actions */
+		% %
+		lines : |
+				lines S newline
+{
+	;
+}
+| lines exit_command { exit(EXIT_SUCCESS); };
+S : '0' A '1' { printf("The string is detected\n>> "); };
+A : str { ; };
+% %
+
+	/* main function */
+	int main()
+{
+	printf("String Chechker built using YACC and LEX\n");
+	printf("Reserved keywords: exit, quit\n");
+	printf(">> ");
+	return yyparse();
+}
+
+void yyerror(char *s)
+{
+	fprintf(stderr, "%s\n", s);
+	exit(1);
+}
+
+Ques 3 : YACC program to recognize string with grammar{bnan | n≥0}.Lex code :
+	/* lex program for recognition of contxt free grammar */
+	% {
+#include <stdio.h>
+#include <stdlib.h>
+/* Generated by yacc */
+#include "y.tab.h"
+		  % } %
+	% exit.*
+{
+	return exit_command;
+}
+quit.* { return exit_command; }
+[ba]
+{ return yytext[0]; }
+\n { return newline; }
+[ \t];
+.
+{
+	ECHO;
+	yyerror("Unexpected Character");
+}
+% %
+	int yywrap()
+{
+	return 1;
+}
+
+Yacc code :
+	/* yacc program for recognition of context free grammar */
+	%
+{
+	void yyerror(char *);
+#include <stdio.h>
+#include <stdlib.h>
+	%
+}
+
+/* yacc definations */
+% start A % token newline % token exit_command
+
+		/* Grammar definations with actions */
+		% %
+		A : |
+			A S newline
+{
+	printf("The String belongs to the CFG.\n>> ");
+}
+| A exit_command { exit(EXIT_SUCCESS); };
+S : 'b' S 'a' { ; }
+| 'b' 'a' { ; };
+% %
+
+	/* main function */
+	int main()
+{
+	printf("Recognition of context free grammar built using YACC and LEX\n");
+	printf("Reserved keywords: exit, quit\n");
+	printf(">> ");
+	return yyparse();
+}
+
+void yyerror(char *s)
+{
+	fprintf(stderr, "%s\n", s);
+}
+
+Ques 4: YACC program for Conversion of Infix to Postfix expression.
+Lex code:
+/* lex program for conversion of infix to postfix */
+%{
+#include <stdio.h>
+#include <stdlib.h>
+/* Generated by yacc */
+#include "y.tab.h"
+%}
+
+/* Lex definations */
+%%
+exit.*
+{
+	return exit_command;
+}
+quit.* { return exit_command; }
+[0 - 9] +
+{
+	yylval.number = atoi(yytext);
+	return num;
+}
+[+*- / ]
+{ return yytext[0]; }
+\n { return newline; }
+[ \t];
+.
+{
+	ECHO;
+	yyerror("Unexpected Character");
+}
+% %
+
+	int yywrap()
+{
+	return 1;
+}
+
+Yacc code :
+
+	/* yacc program for conversion of infix to postfix */
+	%
+{
+	void yyerror(char *);
+#include <stdio.h>
+#include <stdlib.h>
+	%
+}
+
+/* yacc definations */
+% union
+{
+	int number;
+} % start lines % token<number> num % token newline % token exit_command
+
+		/* Grammar definations with actions */
+		% %
+		lines : |
+				lines E newline
+{
+	;
+}
+| lines exit_command { exit(EXIT_SUCCESS); };
+E : E '+' T { printf("+"); }
+| E '-' T { printf("-"); }
+| T { ; };
+T : T '*' F { printf("*"); }
+| T '/' F { printf("/"); }
+| F { ; };
+F : num { printf("%d", $1); };
+% %
+
+	/* main function */
+	int main()
+{
+	return yyparse();
+	return 0;
+}
+
+void yyerror(char *s)
+{
+	fprintf(stderr, "%s\n", s);
+	exit(1);
+}
+Ques 5: YACC program for Binary to Decimal Conversion.
+Lex code:
+/* lex program for conversion of binary to decimal */
+%{
+/* generated by the yacc program */
+#include <stdio.h>
+#include <stdlib.h>
+#include "y.tab.h"
+%}
+
+/* Rules for syntax analyser */
+%%
+exit.*
+{
+	return exit_command;
+}
+quit.* { return exit_command; }
+[01]
+{yylval.val = atoi(yytext); return binary; }
+\n { return newline; }
+[ \t];
+.
+{
+	ECHO;
+	yyerror("Unexpected Character");
+}
+% %
+	int yywrap()
+{
+	return 1;
+}
+
+Yacc code :
+	/* yacc program for binary to decimal conversion */
+	%
+{
+	void yyerror(char *);
+#include <stdio.h>
+#include <stdlib.h>
+	%
+}
+
+/* yacc declaration */
+% union
+{
+	int val;
+} % start lines % token<val> binary % token newline % token exit_command % type<val> left lines
+
+		/* Grammar rules with actions */
+		% %
+		lines : |
+				lines left newline
+{
+	$$ = $2;
+	printf("The Decimal Value is %d.\n>> ", $$);
+}
+| lines exit_command { exit(EXIT_SUCCESS); };
+left : left binary { $$ = $1 * 2 + $2; }
+| binary { $$ = $1; };
+% %
+	/* main function */
+	int main()
+{
+	printf("Conversion of binary to decimal built using YACC and LEX\n");
+	printf("Reserved keywords: exit, quit\n");
+	printf(">> ");
+	return yyparse();
+}
+
+void yyerror(char *s)
+{
+	fprintf(stderr, "%s\n", s);
+}
+
+Ques 6 : YACC program to check whether given string is Palindrome or not .Lex code :
+																		 /* lex program for recognition of palindrome */
+																		 % {
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+/* Generated by yacc */
+#include "y.tab.h"
+																			   % }
+
+																		 /* Lex definitions */
+																		 % % exit.*
+{
+	return exit_command;
+}
+quit.* { return exit_command; }
+[a - zA - Z] +
+{
+	yylval.string = yytext;
+	return STR;
+}
+\n { return newline; }
+[ \t];
+.
+{
+	ECHO;
+	yyerror("Unexpected Character");
+}
+% %
+
+	int yywrap()
+{
+	return 1;
+}
+
+Yacc code :
+	/* yacc program for recognition of palindrome */
+	%
+{
+	void yyerror(char *);
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+	int flag, k, i;
+	%
+}
+
+/* yacc definitions */
+% union
+{
+	char *string;
+} % start lines % token newline % token exit_command % token<string> STR % type<string> E S
+
+		/* Grammar definitions with actions */
+		% %
+		lines : |
+				lines S newline
+{
+	;
+}
+| lines exit_command { exit(EXIT_SUCCESS); };
+S : E
+{
+	flag = 0;
+	k = strlen($1) - 1;
+	if (k % 2 == 0)
+	{
+		for (i = 0; i <= k / 2; i++)
+		{
+			if ($1[i] == $1[k - i])
+			{
+			}
+			else
+			{
+				flag = 1;
+			}
+		}
+		if (flag == 1)
+			printf("Not palindrome\n");
+		else
+			printf("palindrome\n");
+		printf("%s\n>> ", $1);
+	}
+	else
+	{
+		for (i = 0; i < k / 2; i++)
+		{
+			if ($1[i] == $1[k - i])
+			{
+			}
+			else
+			{
+				flag = 1;
+			}
+		}
+		if (flag == 1)
+			printf("Not palindrome\n");
+		else
+			printf("palindrome\n");
+		printf("%s\n>> ", $1);
+	}
+};
+E : STR { $$ = $1; };
+% %
+
+	int main()
+{
+	printf("Palindrome checker built using YACC and LEX\n");
+	printf("Reserved keywords: exit, quit\n");
+	printf(">> ");
+	return yyparse();
+}
+
+void yyerror(char *s)
+{
+	fprintf(stderr, "%s\n", s);
+	exit(1);
+}
